@@ -7,7 +7,7 @@ if sys.version_info < (3, 6):
 from typing import List
 
 import ppcgrader
-import ppccp
+import ppcmf
 
 if __name__ == "__main__":
-    ppcgrader.cli(ppccp.Config(single_precision=False, openmp=False))
+    ppcgrader.cli(ppcmf.Config(False))
