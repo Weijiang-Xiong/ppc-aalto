@@ -19,32 +19,32 @@ void mf(int ny, int nx, int hy, int hx, const float *in, float *out)
 	{
 		for (int x = 0; x < nx; x++)
 		{
-			int a_start = x - hx;
-			if (a_start < 0)
-			{
-				a_start = 0;
-			}
-			int a_end = x + hx + 1;
-			if (a_end > nx)
-			{
-				a_end = nx;
-			}
-			int b_start = y - hy;
-			if (b_start < 0)
-			{
-				b_start = 0;
-			}
-			int b_end = y + hy + 1;
-			if (b_end > ny)
-			{
-				b_end = ny;
-			}
+			// int a_start = x - hx;
+			// if (a_start < 0)
+			// {
+			// 	a_start = 0;
+			// }
+			// int a_end = x + hx + 1;
+			// if (a_end > nx)
+			// {
+			// 	a_end = nx;
+			// }
+			// int b_start = y - hy;
+			// if (b_start < 0)
+			// {
+			// 	b_start = 0;
+			// }
+			// int b_end = y + hy + 1;
+			// if (b_end > ny)
+			// {
+			// 	b_end = ny;
+			// }
 
 			// quite strange this didn't work ...
-			// int a_start = std::max(x - hx, 0);
-			// int a_end = std::min(x + hx + 1, nx);
-			// int b_start = std::max(y - hy, 0);
-			// int b_end = std::min(y + hy + 1, 0);
+			int a_start = std::max(x - hx, 0);
+			int a_end = std::min(x + hx + 1, nx);
+			int b_start = std::max(y - hy, 0);
+			int b_end = std::min(y + hy + 1, ny);
 
 			// use a vector container, learned from cp1 assignment ... do not use array...
 			std::vector<double> window((a_end - a_start) * (b_end - b_start));
