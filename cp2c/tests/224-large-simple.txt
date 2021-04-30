@@ -1,0 +1,2 @@
+timeout 8.2
+random 200 1000 0

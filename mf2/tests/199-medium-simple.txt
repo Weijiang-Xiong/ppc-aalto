@@ -1,0 +1,2 @@
+timeout 0.3
+random 23 5 17 17
