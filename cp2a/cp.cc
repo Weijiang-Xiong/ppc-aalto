@@ -81,24 +81,28 @@ void correlate(int ny, int nx, const float *data, float *result)
     }
 }
 
-// int main()
-// {
-//     const int nx{400}, ny{100};
-//     float data[nx*ny], result[nx*ny];
-//     // std::vector<double> test(100, 6.6); size 100, default value 6.6
-//     std::default_random_engine rand_eng;
-//     std::normal_distribution<double> rand_dist(0.0, 1.0);
 
-//     for (int i = 0; i < ny; i++)
-//     {
-//         for (int j = 0; j < nx; j++)
-//         {
-//             // data[nx*i + j] = rand_dist(rand_eng);
-//             data[nx*i+j]= 1.0;
-//         }
 
-//     }
-
-//     correlate(ny, nx, data, result);
-
-// }
+int main()
+{
+    const int nx{400}, ny{100};
+    float data[nx*ny], result[nx*ny];
+    float data1[4] = {1.0, 2.0, 3.0, 4.0};
+    float result1[4] = {0.0, 0.0, 0.0, 0.0};
+    // std::vector<double> test(100, 6.6); size 100, default value 6.6
+    std::default_random_engine rand_eng;
+    std::normal_distribution<double> rand_dist(0.0, 1.0);
+    for (int i = 0; i < ny; i++)
+    {
+        for (int j = 0; j < nx; j++)
+        {
+            data[nx*i + j] = rand_dist(rand_eng);
+            // data[nx*i+j]= 1.0;
+        }
+    }
+    // result1 should be [1 1 0 1]
+    correlate(2, 2, data1, result1);
+    
+    correlate(ny, nx, data, result); 
+    return 0;
+}
