@@ -54,7 +54,7 @@ void correlate(int ny, int nx, const float *data, float *result)
     std::vector<double> normalized(nx * ny);
 
     // each row
-    // #pragma omp parallel for // need -fopenmp as compiler input
+    #pragma omp parallel for // need -fopenmp as compiler input
     for (int y = 0; y < ny; y++)
     {
         // First normalize the input rows so that each row has the arithmetic mean of 0  be careful to do the normalization so that you do not change pairwise correlations.
@@ -91,7 +91,7 @@ void correlate(int ny, int nx, const float *data, float *result)
     // Let X be the normalized input matrix.
     // Calculate the (upper triangle of the) matrix product Y = XX.T.
     // row id in XX.T
-    // #pragma omp parallel for // need -fopenmp as compiler input
+    #pragma omp parallel for // need -fopenmp as compiler input
     for (int row = 0; row < ny; row++)
     {
         // column id in XX.T

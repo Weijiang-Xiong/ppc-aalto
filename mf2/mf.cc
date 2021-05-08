@@ -19,7 +19,7 @@ void mf(int ny, int nx, int hy, int hx, const float *in, float *out)
 	#pragma omp parallel for // need -fopenmp as compiler input
 	for (int y = 0; y < ny; y++)
 	{
-		#pragma omp parallel for // need -fopenmp as compiler input
+		// #pragma omp parallel for // need -fopenmp as compiler input
 		for (int x = 0; x < nx; x++)
 		{
 			int a_start = std::max(x - hx, 0);
