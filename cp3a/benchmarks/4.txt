@@ -1,0 +1,2 @@
+timeout 34.2
+random 9000 9000 5
