@@ -95,7 +95,6 @@ void correlate(int ny, int nx, const float *data, float *result)
     for (int row = 0; row < ny; row++)
     {
         // column id in XX.T
-        // #pragma omp parallel for // need -fopenmp as compiler input
         for (int col = row; col < ny; col++)
         {
             // vector product of each element
