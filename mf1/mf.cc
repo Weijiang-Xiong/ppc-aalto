@@ -19,28 +19,6 @@ void mf(int ny, int nx, int hy, int hx, const float *in, float *out)
 	{
 		for (int x = 0; x < nx; x++)
 		{
-			// int a_start = x - hx;
-			// if (a_start < 0)
-			// {
-			// 	a_start = 0;
-			// }
-			// int a_end = x + hx + 1;
-			// if (a_end > nx)
-			// {
-			// 	a_end = nx;
-			// }
-			// int b_start = y - hy;
-			// if (b_start < 0)
-			// {
-			// 	b_start = 0;
-			// }
-			// int b_end = y + hy + 1;
-			// if (b_end > ny)
-			// {
-			// 	b_end = ny;
-			// }
-
-			// quite strange this didn't work ...
 			int a_start = std::max(x - hx, 0);
 			int a_end = std::min(x + hx + 1, nx);
 			int b_start = std::max(y - hy, 0);
