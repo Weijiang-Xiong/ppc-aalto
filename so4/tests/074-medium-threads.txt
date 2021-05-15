@@ -1,0 +1,3 @@
+timeout 0.4
+random 101 benchmark
+threads 2

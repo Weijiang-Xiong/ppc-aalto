@@ -76,7 +76,7 @@ void correlate(int ny, int nx, const float *data, float *result)
     const int pr_step = 20;                           // prefetch step
     const int num_cel = (ny + cell_sz - 1) / cell_sz; // number of kxk cells per column, in x @ X.T
     const int num_vec = (nx + vec_len - 1) / vec_len; // number of vector per row, padded
-    const int pad_row = cell_sz * num_cel;            // number of rows after padding 
+    const int pad_row = cell_sz * num_cel;            // number of rows after padding
     
     // copy the original data into a vectorized matrix
     float16_t *vectorized = float16_alloc(pad_row * num_vec);
