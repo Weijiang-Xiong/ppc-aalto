@@ -49,6 +49,19 @@
         "streambuf": "cpp",
         "typeinfo": "cpp",
         "matrixfunctions": "cpp",
-        "alignedvector3": "cpp"
+        "alignedvector3": "cpp",
+        "complex": "cpp",
+        "condition_variable": "cpp",
+        "list": "cpp",
+        "unordered_set": "cpp",
+        "map": "cpp",
+        "set": "cpp",
+        "hash_map": "cpp",
+        "future": "cpp",
+        "iomanip": "cpp",
+        "mutex": "cpp",
+        "thread": "cpp",
+        "cinttypes": "cpp",
+        "valarray": "cpp"
     }
 }

@@ -119,7 +119,8 @@ Result segment(int ny, int nx, const float *data) {
         double best_neg_loss{-10000};
         int x0_thr{0}, y0_thr{0}, x1_thr{0}, y1_thr{0}; //best coordinate in a thread
         // individual jobs for each thread
-        #pragma omp for schedule(dynamic)
+        // use dynamic because different window size means different amount of work
+        #pragma omp for schedule(dynamic) 
         for (int w = 1; w <= nx; w++) // start with a fixed window
         {
             for (int h = 1; h <= ny; h++) 
@@ -138,8 +139,11 @@ Result segment(int ny, int nx, const float *data) {
                         int y1 = y0 + h;
                         // S_in = S(x1, y1) - S(x0, y1) - S(x1, y0) + S(x0, y0)
                         double4_t sum_in_vec = img_sum[x1+(nx+1)*y1] - img_sum[x0+(nx+1)*y1] - img_sum[x1+(nx+1)*y0] + img_sum[x0+(nx+1)*y0];
-                        double4_t sum_out_vec = sum_all - sum_in_vec;
-                        double4_t neg_loss_vec = inv_in * sum_in_vec *sum_in_vec + inv_out * sum_out_vec * sum_out_vec;
+                        // double4_t sum_out_vec = sum_all - sum_in_vec;
+                        // double4_t neg_loss_vec = inv_in * sum_in_vec *sum_in_vec + inv_out * sum_out_vec * sum_out_vec;
+                        // double4_t neg_loss_vec = (inv_in+inv_out) * sum_in_vec * sum_in_vec - 2.0 * inv_out * sum_all * sum_in_vec + inv_out * sum_all * sum_all;
+                        // have a look at https://en.wikipedia.org/wiki/Horner%27s_method
+                        double4_t neg_loss_vec = inv_out * sum_all * sum_all + sum_in_vec * (sum_in_vec * (inv_in+inv_out) - 2.0 * inv_out * sum_all);
                         double neg_loss = neg_loss_vec[0] + neg_loss_vec[1] + neg_loss_vec[2];
                         if (neg_loss > best_neg_loss)
                         {
@@ -166,6 +170,8 @@ Result segment(int ny, int nx, const float *data) {
             }
         }
     }
+
+    // calculate final result with best value
     int numel_in = (y1_bst - y0_bst)*(x1_bst - x0_bst);
     int numel_out = numel - numel_in;
     double inv_in = static_cast<double>(1) / numel_in;
