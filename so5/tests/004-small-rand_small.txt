@@ -1,0 +1,2 @@
+timeout 0.4
+random 0 rand_small
