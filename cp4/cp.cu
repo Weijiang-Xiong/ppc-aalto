@@ -35,7 +35,7 @@ static inline int roundup(int a, int b) {
 }
 
 // transposed version 
-__global__ void mykernel(int ny, int nx, float* transposed, float* result) {
+__global__ void mykernel_transpose(int ny, int nx, float* transposed, float* result) {
     int row = threadIdx.x + blockIdx.x * blockDim.x;
     int col = threadIdx.y + blockIdx.y * blockDim.y;
     if (row >= ny || col >= ny)
@@ -49,18 +49,18 @@ __global__ void mykernel(int ny, int nx, float* transposed, float* result) {
 }
 
 // untransposed version 
-// __global__ void mykernel(int ny, int nx, float* normalized, float* result) {
-//     int row = threadIdx.x + blockIdx.x * blockDim.x;
-//     int col = threadIdx.y + blockIdx.y * blockDim.y;
-//     if (row >= ny or col >= ny)
-//         return;
-//     float inner_prod = 0;
-//     for (int i = 0; i < nx; i++)
-//     {   
-//         // inner_prod +=  normalized[i + row*nx] * normalized[i + col*nx];
-//     }
-//     result[row*ny+col] = inner_prod;
-// }
+__global__ void mykernel_normal(int ny, int nx, float* normalized, float* result) {
+    int row = threadIdx.x + blockIdx.x * blockDim.x;
+    int col = threadIdx.y + blockIdx.y * blockDim.y;
+    if (row >= ny or col >= ny)
+        return;
+    float inner_prod = 0;
+    for (int i = 0; i < nx; i++)
+    {   
+        inner_prod +=  normalized[i + row*nx] * normalized[i + col*nx];
+    }
+    result[row*ny+col] = inner_prod;
+}
 
 void correlate(int ny, int nx, const float* data, float* result) {
 
@@ -92,12 +92,11 @@ void correlate(int ny, int nx, const float* data, float* result) {
         for (int x = 0; x < nx; x++)
         {
             __builtin_prefetch(&normalized[x + y*nx + pr_step]);
+            // normalized[x + y*nx] /= root_square_sum;
             // transposed of shape (nx, ny) normalized of shape (ny, nx)
             // transposed[x, y] = normalized[y, x]
-            // transposed[y + x*ny] = normalized[x + y*nx]
             transposed[y + x*ny] = normalized[x + y*nx] / root_square_sum;
-            // normalized[x + y*nx] /= root_square_sum;
-            // transposed[y + x*ny] = normalized[x + y*nx];
+            
         }
     }
 
@@ -106,12 +105,14 @@ void correlate(int ny, int nx, const float* data, float* result) {
     CHECK(cudaMalloc((void**)&dGPU, nx * ny * sizeof(float)));
     float* rGPU = NULL;
     CHECK(cudaMalloc((void**)&rGPU, ny * ny * sizeof(float)));
+    // CHECK(cudaMemcpy(dGPU, normalized, nx * ny * sizeof(float), cudaMemcpyHostToDevice));
     CHECK(cudaMemcpy(dGPU, transposed, nx * ny * sizeof(float), cudaMemcpyHostToDevice));
 
     // Run kernel
     dim3 dimBlock(KERNEL_SIZE, KERNEL_SIZE);
     dim3 dimGrid(divup(ny, dimBlock.x), divup(ny, dimBlock.y));
-    mykernel<<<dimGrid, dimBlock>>>(ny, nx, dGPU, rGPU);
+    // mykernel_normal<<<dimGrid, dimBlock>>>(ny, nx, dGPU, rGPU);
+    mykernel_transpose<<<dimGrid, dimBlock>>>(ny, nx, dGPU, rGPU);
     CHECK(cudaDeviceSynchronize());
     CHECK(cudaGetLastError());
 
