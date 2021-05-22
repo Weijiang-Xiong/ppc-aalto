@@ -1,0 +1,2 @@
+timeout 2.0
+random 10 1000 0

@@ -10,30 +10,6 @@
 
 typedef unsigned long long data_t;
 
-// void swap(data_t *a, data_t *b){
-//     auto t = *a;
-//     *a = *b;
-//     *b = t;
-// }
-
-// int partition(data_t *data, int low, int high, data_t pivot)
-// {
-//     // just use the last element as pivot
-//     int i = low-1;
-//     // #pragma omp parallel for
-//     for (int j = low; j < high; j++)
-//     {
-//         if (data[j] < pivot)
-//         {
-//             i++;
-//             swap(&data[i], &data[j]);
-//         }
-//     }
-//     // put the pivot right after those smaller than it
-//     swap(&data[i+1], &data[high]); 
-//     return i+1; // return the index of the pivot
-// }
-
 data_t choose_pivot(data_t *data_low, data_t *data_high)
 {
     unsigned int seed = omp_get_thread_num();
