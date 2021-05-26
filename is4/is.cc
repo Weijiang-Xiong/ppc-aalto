@@ -3,6 +3,8 @@
 #include <random>
 #include <omp.h>
 
+#define HUGE_NEGATIVE -10000
+
 // void printVector(int A[], int len)
 // {
 // for (int i = 0; i < len; i++)
@@ -109,14 +111,14 @@ Result segment(int ny, int nx, const float *data) {
 
     double4_t sum_all = img_sum[nx + (nx+1)*ny];
     
-    double overall_best{-10000};
+    double overall_best{HUGE_NEGATIVE};
     int x0_bst{0}, y0_bst{0}, x1_bst{0}, y1_bst{0}; //best coordinate in a thread
     #pragma omp parallel
     {   
         // local initialization keep track of the smallest loss, or largest negative loss. 
         
         
-        double best_neg_loss{-10000};
+        double best_neg_loss{HUGE_NEGATIVE};
         int x0_thr{0}, y0_thr{0}, x1_thr{0}, y1_thr{0}; //best coordinate in a thread
         // individual jobs for each thread
         // use dynamic because different window size means different amount of work
