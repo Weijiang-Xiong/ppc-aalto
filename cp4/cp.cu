@@ -16,6 +16,25 @@
 #include <cuda_runtime.h>
 #define KERNEL_SIZE 16 // tuned a the submission portal
 
+// void printVector(int A[], int len)
+// {
+// for (int i = 0; i < len; i++)
+//     std::cout << A[i] << " ";
+// }
+
+// void printMatrix(int A[], int ny, int nx)
+// {   
+//     for (int y = 0; y < ny; y++)
+//     {
+//         for (int x = 0; x < nx; x++)
+//         {
+//             std::cout << A[y*ny + x] << " ";
+//         }
+//         std::cout << std::endl;
+//     }
+// }
+
+
 static inline void check(cudaError_t err, const char* context) {
     if (err != cudaSuccess) {
         std::cerr << "CUDA error: " << context << ": "
