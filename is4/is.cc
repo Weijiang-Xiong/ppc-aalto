@@ -2,26 +2,11 @@
 #include <vector>
 #include <random>
 #include <omp.h>
+#include <iostream>
+#include <chrono>
+#include <ctime>
 
 #define HUGE_NEGATIVE -10000
-
-// void printVector(int A[], int len)
-// {
-// for (int i = 0; i < len; i++)
-//     std::cout << A[i] << " ";
-// }
-
-// void printMatrix(int A[], int ny, int nx)
-// {   
-//     for (int y = 0; y < ny; y++)
-//     {
-//         for (int x = 0; x < nx; x++)
-//         {
-//             std::cout << A[y*ny + x] << " ";
-//         }
-//         std::cout << std::endl;
-//     }
-// }
 
 typedef double double4_t __attribute__ ((vector_size (4 * sizeof(double))));
 
@@ -70,6 +55,7 @@ Result segment(int ny, int nx, const float *data) {
     double4_t* vectorized = double4_alloc(numel);
     double4_t* img_sum = double4_alloc(numel + nx + ny + 1); // size (ny+1, nx+1)
 
+    auto start = std::chrono::system_clock::now();
     #pragma omp parallel for
     for (int y = 0; y < ny; y++)
     {
@@ -84,7 +70,11 @@ Result segment(int ny, int nx, const float *data) {
             vectorized[position_1d][2] = data[3*position_1d + 2];
         }
     }
+    auto end = std::chrono::system_clock::now();
+    std::chrono::duration<double> elapsed_seconds = end-start;
+    std::cout << "padding and vectorize: " << elapsed_seconds.count() << "s\n";
 
+    start = std::chrono::system_clock::now();
     #pragma omp parallel for
     for (int y = 0; y <= ny; y++)
     {
@@ -108,17 +98,20 @@ Result segment(int ny, int nx, const float *data) {
             img_sum[x + (nx+1)*y] = img_sum[x-1 + (nx+1)*y] + img_sum[x + (nx+1)*(y-1)] - img_sum[(x-1)+(nx+1)*(y-1)] + vectorized[(x-1) + nx*(y-1)];
         }
     }
-
     double4_t sum_all = img_sum[nx + (nx+1)*ny];
-    
+
+    end = std::chrono::system_clock::now();
+    elapsed_seconds = end-start;
+    std::cout << "calculating sum: " << elapsed_seconds.count() << "s\n";
+
+    start = std::chrono::system_clock::now();
+
     double overall_best{HUGE_NEGATIVE};
     int x0_bst{0}, y0_bst{0}, x1_bst{0}, y1_bst{0}; //best coordinate in a thread
     #pragma omp parallel
     {   
         // local initialization keep track of the smallest loss, or largest negative loss. 
-        
-        
-        double best_neg_loss{HUGE_NEGATIVE};
+        double thread_best{HUGE_NEGATIVE}; // the best loss of this thread
         int x0_thr{0}, y0_thr{0}, x1_thr{0}, y1_thr{0}; //best coordinate in a thread
         // individual jobs for each thread
         // use dynamic because different window size means different amount of work
@@ -135,7 +128,8 @@ Result segment(int ny, int nx, const float *data) {
 
                 for (int y0 = 0; y0 <= ny-h; y0++)
                 {
-                    for (int x0 = 0; x0 <= nx-w; x0++)
+                    // put x in the inner most, so memory access will be continuous
+                    for (int x0 = 0; x0 <= nx-w; x0++) 
                     {
                         int x1 = x0 + w;
                         int y1 = y0 + h;
@@ -145,11 +139,12 @@ Result segment(int ny, int nx, const float *data) {
                         // double4_t neg_loss_vec = inv_in * sum_in_vec *sum_in_vec + inv_out * sum_out_vec * sum_out_vec;
                         // double4_t neg_loss_vec = (inv_in+inv_out) * sum_in_vec * sum_in_vec - 2.0 * inv_out * sum_all * sum_in_vec + inv_out * sum_all * sum_all;
                         // have a look at https://en.wikipedia.org/wiki/Horner%27s_method
+                        // gcc will prepare the coefficient outside the 2 inner most loops
                         double4_t neg_loss_vec = inv_out * sum_all * sum_all + sum_in_vec * (sum_in_vec * (inv_in+inv_out) - 2.0 * inv_out * sum_all);
                         double neg_loss = neg_loss_vec[0] + neg_loss_vec[1] + neg_loss_vec[2];
-                        if (neg_loss > best_neg_loss)
+                        if (neg_loss > thread_best)
                         {
-                            best_neg_loss = neg_loss;
+                            thread_best = neg_loss;
                             x0_thr = x0;
                             y0_thr = y0;
                             x1_thr = x1;
@@ -162,9 +157,9 @@ Result segment(int ny, int nx, const float *data) {
 
         #pragma omp critical // update global data 
         {
-            if (best_neg_loss > overall_best)
+            if (thread_best > overall_best)
             {
-                overall_best = best_neg_loss;
+                overall_best = thread_best;
                 x0_bst = x0_thr;
                 y0_bst = y0_thr;
                 x1_bst = x1_thr;
@@ -188,6 +183,10 @@ Result segment(int ny, int nx, const float *data) {
                   y1_bst, x1_bst,
                  {float(sum_out_vec[0]), float(sum_out_vec[1]), float(sum_out_vec[2])},
                  {float(sum_in_vec[0]), float(sum_in_vec[1]), float(sum_in_vec[2])}};
+
+    end = std::chrono::system_clock::now();
+    elapsed_seconds = end-start;
+    std::cout << "iterating over all possible places: " << elapsed_seconds.count() << "s\n";
 
     free(vectorized);
     free(img_sum);
