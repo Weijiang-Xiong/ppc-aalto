@@ -1,0 +1,2 @@
+timeout 2.0
+structured-binary 7 2
