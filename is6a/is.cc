@@ -29,6 +29,9 @@ constexpr float8_t fVeczero{
 
 static inline float max_vec(float8_t vv)
 {
+    // there might be a lot of nans at the end
+    // comparison with a nan will always be false
+    // so assume every comparison is false, we shall take vv[0]
     float m1 = (vv[0]<=vv[1]) ? vv[1] : vv[0];
     float m2 = (vv[2]<=vv[3]) ? vv[3] : vv[2];
     float m3 = (vv[4]<=vv[5]) ? vv[5] : vv[4];
@@ -107,6 +110,9 @@ finding best window size: 3.67949s
 finding best location for best window: 0.0002392s
 
 get 4 points, so difficult 
+
+better vectorization benchmarks/4.txt 1.102s  pass
+finally
 */
 Result segment(int ny, int nx, const float *data) {
     // calculate the sum of pixel values 
